@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Campus Events</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Dropdown visibility control */
+        .dropdown {
+            display: none;
+        }
+        .dropdown.show {
+            display: block;
+        }
+
+        /* Modal visibility control */
+        .modal {
+            display: none;
+        }
+        .modal.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+    <!-- Header -->
+    <header class="bg-white border-b shadow-sm py-4 px-6">
+        <div class="flex justify-between items-center max-w-7xl mx-auto">
+            <div class="flex items-center space-x-2">
+                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span class="text-xl font-semibold text-gray-800">Campus Events</span>
+            </div>
+            <nav class="flex space-x-6 text-gray-600">
+                <a href="/" class="hover:text-gray-900">Home</a>
+                <a href="/events" class="hover:text-gray-900">Events</a>
+                <!-- Profile Icon with Dropdown -->
+                <div class="relative">
+                    <img src="https://i.pravatar.cc/150?img=12" alt="User avatar" class="w-8 h-8 rounded-full cursor-pointer" onclick="toggleDropdown()" id="profileIcon">
+                    <!-- Dropdown Menu -->
+                    <div id="profileDropdown" class="dropdown absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg">
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">View Profile</a>
+                        <a href="#" class="block px-4 py-2 text-red-600 hover:bg-gray-100">Log Out</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto py-10 px-6">
+        <div class="flex space-x-12">
+            <!-- Profile Details -->
+            <% if (currentUser) { %>
+            <div class="w-2/3 space-y-6">
+                <div class="flex items-center space-x-4">
+                    <img src="https://i.pravatar.cc/150?img=65" alt="Profile" class="w-16 h-16 rounded-full">
+                    <div>
+                        <h1 class="text-2xl font-semibold"><%= currentUser.name %></h1>
+                        <p class="text-gray-600"><%= currentUser.email %></p>
+                        <p class="text-gray-500">Product Designer at Facebook</p>
+                    </div>
+                </div>
+                <% } %>
+                
+                <!-- RSVP'd Events -->
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold">RSVP'd Events</h2>
+                    <% if (RSVP && RSVP.length > 0) { %>
+                        <% RSVP.forEach(rsvp => { %>
+                    <div class="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-sm border">
+                        <img src="/<%= rsvp.photo_path %>" alt="Event Image" class="w-16 h-16 rounded-md">
+                        <div class="flex-1">
+                            <h3 class="font-semibold"><%= rsvp.name %></h3>
+                            <p class="text-gray-500 text-sm"><%= rsvp.date %>, <%= rsvp.time %></p>
+                        </div>
+                        <button onclick="showEventDetails('<%= rsvp.name %>', '<%= rsvp.date %>', '<%= rsvp.time %>', '<%= rsvp.description %>.')" class="text-gray-600 bg-gray-100 px-4 py-2 rounded-md hover:bg-gray-200">View Details</button>
+                    </div>
+                    <% }) %>
+                    <% } else { %>
+                        <p>No RSVPS.</p>
+                    <% } %>
+                    
+                </div>
+            </div>
+
+            <!-- Profile Sidebar -->
+            <div class="w-1/3 space-y-6">
+                <div class="flex space-x-4">
+                    <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md shadow-sm hover:bg-gray-200">Edit Profile</button>
+                </div>
+
+                <!-- About Section -->
+                <% if (currentUser) { %>
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <h2 class="text-xl font-semibold mb-4">About</h2>
+                    <p class="text-gray-500">Email</p>
+                    <p><%= currentUser.email %></p>
+                    <p class="text-gray-500 mt-4">Phone</p>
+                    <p><%= currentUser.phone_no %>7</p>
+                    <p class="text-gray-500 mt-4">Timezone</p>
+                    <p>Pacific Time</p>
+                    <p class="text-gray-500 mt-4">Preferred Language</p>
+                    <p>English</p>
+                </div>
+                <% } %>
+
+                <!-- Role Section -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <h2 class="text-xl font-semibold mb-4">Role</h2>
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 13.121A3 3 0 118.879 9.88a5.978 5.978 0 00-2.758 2.758zM8 13h.01M12 6.354a5 5 0 015 0M4.22 4.22a5 5 0 000 7.071m15.36 0a5 5 0 000-7.071M9 17v5m6-5v5"></path>
+                        </svg>
+                        <span>Product Designer</span>
+                    </div>
+                    <button class="mt-4 bg-gray-100 text-gray-700 px-4 py-2 rounded-md shadow-sm hover:bg-gray-200">Manage Role</button>
+                </div>
+
+                <!-- Interests Section -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <h2 class="text-xl font-semibold mb-4">Interests</h2>
+                    <p class="text-gray-500">No interests yet. Add some to personalize your experience.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Event Details Modal -->
+    <div id="eventModal" class="modal fixed inset-0 items-center justify-center bg-black bg-opacity-50" style="display: none;">
+        <div class="bg-white w-1/2 rounded-lg shadow-lg p-6 relative">
+            <h2 id="modalEventTitle" class="text-2xl font-semibold mb-4">Event Title</h2>
+            <p id="modalEventDate" class="text-gray-600 mb-2">Event Date</p>
+            <p id="modalEventTime" class="text-gray-600 mb-4">Event Time</p>
+            <p id="modalEventDescription" class="text-gray-700">Event Description</p>
+            <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-600 hover:text-gray-800">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        // Toggle the profile dropdown menu
+        function toggleDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Show the event details modal and populate with event details
+        function showEventDetails(title, date, time, description) {
+            document.getElementById('modalEventTitle').textContent = title;
+            document.getElementById('modalEventDate').textContent = date;
+            document.getElementById('modalEventTime').textContent = time;
+            document.getElementById('modalEventDescription').textContent = description;
+            document.getElementById('eventModal').style.display = 'flex';
+        }
+
+        // Close the event details modal
+        function closeModal() {
+            document.getElementById('eventModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

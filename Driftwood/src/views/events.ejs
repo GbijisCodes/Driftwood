@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - Campus Event</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Button shadow effects */
+        .filter-button {
+            transition: box-shadow 0.2s;
+        }
+        .filter-button:hover {
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .filter-button:active {
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Category hover effects */
+        .category-button {
+            transition: background-color 0.2s, box-shadow 0.2s;
+            border-radius: 25px;
+        }
+        .category-button:hover {
+            background-color: #f3f4f6;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 25px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-1/5 bg-white p-8">
+            <ul class="space-y-4 text-gray-700">
+                <li class="category-button font-medium text-gray-900 cursor-pointer p-2">
+                    <a href="/events?category=Academic">Academic</a>
+                </li>
+                <li class="category-button cursor-pointer p-2">
+                    <a href="/events?category=Social">Social</a>
+                </li>
+                <li class="category-button cursor-pointer p-2">
+                    <a href="/events?category=Sports">Sports</a>
+                </li>
+                <li class="category-button cursor-pointer p-2">
+                    <a href="/events?category=Career">Career</a>
+                </li>
+                <li class="category-button cursor-pointer p-2">
+                    <a href="/events?category=Volunteer">Volunteer</a>
+                </li>
+                <li class="category-button cursor-pointer p-2">
+                    <a href="/events?category=Misc">Misc</a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <!-- Header with Title and Profile Icon -->
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-semibold">Events</h1>
+                <div class="relative">
+                    <img src="https://via.placeholder.com/40" alt="Profile Icon" class="w-10 h-10 rounded-full cursor-pointer" onclick="toggleDropdown()" id="profileIcon">
+                    <!-- Dropdown Menu -->
+                    
+                    <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg hidden">
+                        <% if (formData) { %>
+                            <a href="/profile/<%= formData.id %>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">View Profile</a>
+                            <form action="/logout" method="POST" class="block">
+                                <button type="submit" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Log Out</button>
+                            </form>
+                        <% } else { %>
+                            <a href="/login" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Login</a>
+                            <a href="/signup" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Register</a>
+                        <% } %>
+                    </div>
+                   
+                </div>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex space-x-3 mb-8">
+                <a href="/events?filter=all" class="bg-gray-100 text-gray-600 py-1 px-4 rounded-full filter-button">All events</a>
+                <a href="/events?filter=today" class="bg-gray-100 text-gray-600 py-1 px-4 rounded-full filter-button">Today</a>
+                <a href="/events?filter=tomorrow" class="bg-gray-100 text-gray-600 py-1 px-4 rounded-full filter-button">Tomorrow</a>
+                <a href="/events?filter=this_week" class="bg-gray-100 text-gray-600 py-1 px-4 rounded-full filter-button">This week</a>
+            </div>
+
+            <!-- Event List -->
+            <div id="eventList" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <% if (events && events.length > 0) { %>
+                    <% events.forEach(event => { %>
+                        <div class="event-item flex items-start space-x-4">
+                            <div class="flex-1">
+                                <h2 class="text-xl font-semibold"><%= event.name %></h2>
+                                <p class="text-sm text-gray-500"><%= event.category %></p>
+                                <button onclick="showEventDetails('<%= event.id %>', '<%= event.name %>', '<%= event.description %>', '<%= event.category %>', '<%= event.location %>', '<%= event.date %>', '<%= event.time %>', '/<%= event.photo_path %>')" class="mt-2 bg-gray-100 text-gray-600 py-1 px-4 rounded-full filter-button">View details</button>
+                            </div>
+                            <img src="/<%= event.photo_path || 'images/placeholder.jpg' %>" alt="Event Image" class="w-32 h-20 rounded-lg object-cover">
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p>No events found for this filter.</p>
+                <% } %>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Event Details -->
+    <% if (formData) { %>
+        <div id="eventModal" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-lg w-1/3 flex items-start space-x-4">
+                <img id="modalEventImage" src="" alt="Event Image" class="w-24 h-24 rounded-lg object-cover">
+                <div>
+                    <h2 id="modalEventName" class="text-2xl font-semibold mb-4">Event Name</h2>
+                    <p id="modalEventDescription" class="text-gray-700 mb-2">Event description goes here.</p>
+                    <p class="text-sm text-gray-500"><span id="modalEventCategory">Category</span> | <span id="modalEventLocation">Location</span></p>
+                    <p class="text-sm text-gray-500 mt-1"><span id="modalEventDate">Date</span> | <span id="modalEventTime">Time</span></p>
+        
+                    <!-- Dynamic RSVP Link -->
+                    <a href="#" id="rsvpLink" class="mt-4 bg-gray-100 text-gray-600 py-1 px-4 rounded-full filter-button">RSVP</a>
+                    <button onclick="closeEventModal()" class="mt-4 bg-gray-100 text-gray-600 py-1 px-4 rounded-full filter-button">Close</button>
+                </div>
+            </div>
+        </div>
+    <% } %>
+    
+
+    <script>
+       function showEventDetails(eventId, name, description, category, location, date, time, photoPath) {
+        document.getElementById('modalEventName').innerText = name;
+        document.getElementById('modalEventDescription').innerText = description;
+        document.getElementById('modalEventCategory').innerText = category;
+        document.getElementById('modalEventLocation').innerText = location;
+        document.getElementById('modalEventDate').innerText = date;
+        document.getElementById('modalEventTime').innerText = time;
+        document.getElementById('modalEventImage').src = photoPath;
+
+        // Set the RSVP link dynamically with userId from formData and eventId
+        const userId = "<%= formData.id %>"; // Get userId from server-rendered data
+        document.getElementById('rsvpLink').href = `/rsvp?userId=${userId}&eventId=${eventId}`;
+
+        // Show the modal
+        document.getElementById('eventModal').classList.remove('hidden');
+    }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.add('hidden');
+        }
+        // Toggle profile dropdown
+        function toggleDropdown() {
+            document.getElementById('profileDropdown').classList.toggle('hidden');
+        }
+
+        // Close the dropdown if clicked outside
+        window.onclick = function(event) {
+            if (!event.target.matches('#profileIcon')) {
+                document.getElementById('profileDropdown').classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
